@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var item = require("./item")
+var item = require("./item");
+var itemList = require("./itemList");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -26,11 +27,7 @@ connection.connect(function(err) {
         type: "list",
         message: "What would you like to do?",
         choices: [
-          "Get all products",
-          // "Find all artists who appear more than once",
-          // "Find data within a specific range",
-          // "Search for a specific song",
-          // "Find artists with a top song and top album in the same year"
+          "Get all products"
         ]
       })
       .then(function(answer) {
@@ -38,22 +35,6 @@ connection.connect(function(err) {
           case "Get all products":
             productSearch();
             break;
-  
-          // case "Find all artists who appear more than once":
-          //   multiSearch();
-          //   break;
-  
-          // case "Find data within a specific range":
-          //   rangeSearch();
-          //   break;
-  
-          // case "Search for a specific song":
-          //   songSearch();
-          //   break;
-  
-          // case "Find artists with a top song and top album in the same year":
-          //   songAndAlbumSearch();
-          //   break;
         }
       });
   }
@@ -61,88 +42,57 @@ connection.connect(function(err) {
   
   function productSearch(){
     var query = "SELECT * FROM products ORDER BY item_id";
-    var objProductList = {};
+    var objItemList  = new itemList;
     connection.query(query, function(err, res) {
       if(err){
         console.log(err);
       }
       for (var i = 0; i < res.length; i++) {
         var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity);
-        objProductList[i] = productItem; 
-        productItem.printItemInfo();
+       objItemList.addToItemList(i, productItem);
       }
-      
-      console.log(objProductList);
-      userPrompt(objProductList);
+      userPrompt(objItemList);
     });
   }
 
-  function userPrompt(objProductList) {
-    var itmSelection =[];
-    for (var idx in objProductList){
-      itmSelection.push(objProductList[idx].id+" "+objProductList[idx].product +" "+objProductList[idx].price);
-    }
+  function userPrompt(objList) {
+    var obj = objList.objProductList;
+    objList.makeSelectionList();
     inquirer
       .prompt({
         name: "choice",
         type: "list",
         message: "Which item would you like to purchase?",
-        choices: itmSelection
+        choices: objList.itmSelection
       })
       .then(function(answer) {
-        console.log(answer.choice);
+        console.log(`Your purchase selection is ${answer.choice}.`);
         var itemSelected = answer.choice.split(" ");
-        console.log(itemSelected[0]);
-        orderQty(objProductList, itemSelected[0]);
-        
-        // switch (answer.action) {
-        //   case "Get all products":
-        //     productSearch();
-        //     break;
-  
-        //   case "Find all artists who appear more than once":
-        //     multiSearch();
-        //     break;
-  
-        //   case "Find data within a specific range":
-        //     rangeSearch();
-        //     break;
-  
-        //   case "Search for a specific song":
-        //     songSearch();
-        //     break;
-  
-        //   case "Find artists with a top song and top album in the same year":
-        //     songAndAlbumSearch();
-        //     break;
-        //}
+        orderQty(obj, itemSelected[0]);
       });
   }
 
-function orderQty(objProductList, itemSelectedId){
+function orderQty(obj, itemSelectedId){
   var idx = parseInt(itemSelectedId) - 1;
   inquirer
-          .prompt({
-            name: "quantity",
-            type: "input",
-            message: "How many items would you like to purchase?"
-          })
-          .then(function(answer) {
-            console.log(answer.quantity);
-            var qtySelected = parseInt(answer.quantity);
-            var qtyMax = parseInt(objProductList[idx].qty);
-            console.log(qtyMax);
-            if(qtySelected && qtySelected < qtyMax+1){
-              ttlPrice = (parseFloat(objProductList[idx].price) * qtySelected).toFixed(2);
-              console.log(`Your purchase total is : $${ttlPrice} ` ) 
-              processOrder(qtySelected, qtyMax, itemSelectedId);
-            }else{
-              console.log(answer.quantity)
-              console.log(`Please enter a quantity between 1 and ${qtyMax}`);
-              orderQty(objProductList, itemSelectedId);
-            }
-            
-          });
+    .prompt({
+      name: "quantity",
+      type: "input",
+      message: "How many items would you like to purchase?"
+      })
+    .then(function(answer) {
+      var qtySelected = parseInt(answer.quantity);
+      var qtyMax = parseInt(obj[idx].qty);
+      if(qtySelected && qtySelected < qtyMax+1){
+        ttlPrice = (parseFloat(obj[idx].price) * qtySelected).toFixed(2);
+        console.log(`You purchased ${qtySelected} ${obj[idx].product}.\n Your purchase total is : $${ttlPrice} ` ) 
+        processOrder(qtySelected, qtyMax, itemSelectedId);
+      }else{
+        console.log(`Please enter a quantity between 1 and ${qtyMax}`);
+        orderQty(obj, itemSelectedId);
+      }
+      
+    });
 }
 
 function processOrder(qtySelected, qtyMax, itemSelectedId){
