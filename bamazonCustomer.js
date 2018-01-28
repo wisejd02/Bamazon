@@ -1,25 +1,15 @@
-var mysql = require("mysql");
 var inquirer = require("inquirer");
 var item = require("./item");
 var itemList = require("./itemList");
+var connect = require("./connect");
 
-var connection = mysql.createConnection({
-  host: "localhost",
-  port: 8889,
+var bamazonConnect = new connect("bamazon");
+var connection = bamazonConnect.connect();
 
-  // Your username
-  user: "root",
+ if(connection){
+   runBamazon();
+ } 
 
-  // Your password
-  password: "root",
-  database: "bamazon"
-});
-
-connection.connect(function(err) {
-    if (err) throw err;
-    runBamazon();
-  });
-  
   function runBamazon() {
     inquirer
       .prompt({
@@ -27,12 +17,12 @@ connection.connect(function(err) {
         type: "list",
         message: "What would you like to do?",
         choices: [
-          "Get all products"
+          "View Products for Sale"
         ]
       })
       .then(function(answer) {
         switch (answer.action) {
-          case "Get all products":
+          case "View Products for Sale":
             productSearch();
             break;
         }
@@ -49,7 +39,8 @@ connection.connect(function(err) {
       }
       for (var i = 0; i < res.length; i++) {
         var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity);
-       objItemList.addToItemList(i, productItem);
+        objItemList.addToItemList(i, productItem);
+        productItem.printItemInfo();
       }
       userPrompt(objItemList);
     });
@@ -109,11 +100,12 @@ function processOrder(qtySelected, qtyMax, itemSelectedId){
       }
     ],
     function(err, res) {
-      console.log(`${res.affectedRows} products updated!\n`);
+      console.log(`${res.affectedRows} products updated!\n Thank you Come Again!\n Now exiting.`);
+      process.exit();
     }
   );
 
   // logs the actual query being run
   //console.log(query.sql);
-
+  
 }
