@@ -20,28 +20,32 @@ var connection = bamazonConnect.connect();
           "View Products for Sale",
           "View Low Inventory",
           "Add to Inventory",
-          "Add New Product"
+          "Add New Product",
+          "Exit"
         ]
       })
       .then(function(answer) {
         switch (answer.action) {
           case "View Products for Sale":
-            productSearch();
+            productSearch(false);
             break;
           case "View Low Inventory":
             lowInventoySearch();
             break;
           case "Add to Inventory":
-            addInventory();
+            productSearch(true);
             break;
           case "Add New Product":
             addProduct();
+            break;
+        case "Exit":
+            exitPrgm();
             break;
         }
       });
   }
 
-  function productSearch(){
+  function productSearch(addInv){
     var query = "SELECT * FROM products ORDER BY item_id";
     var objItemList  = new itemList;
     connection.query(query, function(err, res) {
@@ -53,7 +57,11 @@ var connection = bamazonConnect.connect();
         objItemList.addToItemList(i, productItem);
         productItem.printItemInfo();
       }
-      runBamazon();
+      if(!addInv){
+        runBamazon();
+      }else{
+        userPrompt(objItemList);
+      }
     });
   }
 
@@ -74,10 +82,97 @@ var connection = bamazonConnect.connect();
     });
   }
 
-  function addInventory(){
+  function userPrompt(objList) {
+    var obj = objList.objProductList;
+    objList.makeSelectionList();
+    inquirer
+      .prompt({
+        name: "choice",
+        type: "list",
+        message: "Which item would you like to add inventory to?",
+        choices: objList.itmSelection
+      })
+      .then(function(answer) {
+        console.log(`You chose to add inventory to: ${answer.choice}.`);
+        var itemSelected = answer.choice.split(" ");
+        addQty(obj, itemSelected[0]);
+      });
+  }
 
+  function addQty(obj, itemSelectedId){
+    var idx = parseInt(itemSelectedId) - 1;
+    inquirer
+      .prompt({
+        name: "quantity",
+        type: "input",
+        message: "How many items would you like to add?"
+        })
+      .then(function(answer) {
+        var qtyAdd = parseInt(answer.quantity);
+        if(qtyAdd){
+          var newQty = (parseInt(obj[idx].qty) + qtyAdd);
+          console.log(`You are adding ${qtyAdd} ${obj[idx].product}.\n Your inventory total is : ${newQty} ` ) 
+          processOrder(newQty, itemSelectedId);
+        }else{
+          console.log(`Please enter a whole number value!`);
+          addQty(obj, itemSelectedId);
+        }
+        
+      });
+  }
+
+  function processOrder(newQty, itemSelectedId){
+    console.log(`Updating Bamazon quantities...\n`);
+    var query = connection.query(
+      "UPDATE products SET ? WHERE ?",
+      [
+        {
+          stock_quantity: newQty
+        },
+        {
+          item_id: itemSelectedId
+        }
+      ],
+      function(err, res) {
+        console.log(`${res.affectedRows} products updated!\n Thank you Come Again!\n Now exiting.`);
+        runBamazon();
+        
+      }
+    ); 
+    // logs the actual query being run
+    //console.log(query.sql);
   }
 
   function addProduct(){
-      
+    inquirer
+      .prompt({
+        name: "product",
+        type: "input",
+        message: "Enter Product Name:"
+        })
+      .then(function(answer) {
+          if(answer.product){
+            var productItem = new item('', answer.product, 'dept_name', 'price', 'stock_quantity');
+            productItem.depts();
+
+            console.log(productItem);
+            //chooseDept(productItem.deptList(), answer.product);
+          }
+      });
+  };
+function chooseDept(arrDept, product){
+    inquirer
+      .prompt({
+        name: "choice",
+        type: "list",
+        message: "Which item would you like to add inventory to?",
+        choices: arrDept
+      })
+      .then(function(answer) {
+        console.log(`You chose to add ${product} to department: ${answer.choice}.`);
+        
+      });
+}
+  function exitPrgm(){
+    process.exit();
   }

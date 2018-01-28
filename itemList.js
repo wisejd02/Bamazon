@@ -1,7 +1,6 @@
 var ItemList = function (){
-    this.objProductList = {};
-    this.itmSelection =[];
-    
+    this.objProductList = {},
+    this.itmSelection =[] 
 }
 
 ItemList.prototype.addToItemList = function(key, obj){
