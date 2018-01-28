@@ -154,9 +154,7 @@ var connection = bamazonConnect.connect();
           if(answer.product){
             var productItem = new item('', answer.product, 'dept_name', 'price', 'stock_quantity');
             productItem.depts();
-
-            console.log(productItem);
-            //chooseDept(productItem.deptList(), answer.product);
+            chooseDept(productItem.depts(), answer.product);
           }
       });
   };
@@ -169,10 +167,65 @@ function chooseDept(arrDept, product){
         choices: arrDept
       })
       .then(function(answer) {
-        console.log(`You chose to add ${product} to department: ${answer.choice}.`);
-        
+        console.log(`You chose to add ${product} to the ${answer.choice} department.`);
+        price(product, answer.choice)
       });
 }
   function exitPrgm(){
     process.exit();
+  }
+
+  function price(product, dept){
+    inquirer
+      .prompt({
+        name: "price",
+        type: "input",
+        message: `Enter Price for ${product}:`
+        })
+      .then(function(answer) {
+          if(parseFloat(answer.price)){
+            var price = parseFloat(answer.price).toFixed(2);
+            qty(product, dept, price);
+          }else{
+              console.log(`Please enter a positive value!`);
+              price(product, dept);
+          }
+      });
+  };
+
+  function qty(product, dept, price){
+    inquirer
+      .prompt({
+        name: "qty",
+        type: "input",
+        message: `Enter qty for ${product}:`
+        })
+      .then(function(answer) {
+          if(parseInt(answer.qty)){
+              var qty = parseInt(answer.qty);
+            addItem(product, dept, price, qty)
+          }else{
+              console.log(`Please enter a positive value!`);
+              qty(product, dept, price);
+          }
+      });
+  };
+
+  function addItem(product, dept, price, qty){
+    console.log(`Updating Bamazon quantities...\n`);
+    var query = connection.query(
+        "INSERT INTO products SET ?",
+        {
+        product_name: product,
+        dept_name: dept,
+        price: price,
+        stock_quantity: qty
+        },
+        function(err, res) {
+        console.log(res.affectedRows + " product inserted!\n");
+        
+        runBamazon();
+        }
+    );
+    //console.log(query.sql);
   }

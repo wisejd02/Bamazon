@@ -14,12 +14,8 @@ Item.prototype.printItemInfo = function(){
     );
 }
 Item.prototype.depts = function(){
-    var arrDepts = [];
-    fs.readFile('depts.txt', 'utf8',(err, data) => {
-       
-		if (err) throw err;
-        //this.depts = data.split("\n");
-        arrDepts = data.split("\n");
+    var data = fs.readFileSync('./depts.txt', 'utf8');
+        var arrDepts = data.split("\n");
         //console.log(arrDepts);
         console.log(arrDepts.length+" length");
         for(var i = 0; i<arrDepts.length; i++){
@@ -28,9 +24,9 @@ Item.prototype.depts = function(){
             console.log("this "+this.deptsArr[i])
         }
         
-        //return arrDepts;
+        return arrDepts;
         //console.log(this.deptsArr)
-      });
+    
       
 }
 
