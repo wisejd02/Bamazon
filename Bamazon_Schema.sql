@@ -14,16 +14,16 @@ CREATE TABLE `products` (
   `item_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_name` VARCHAR(100) NULL,
   `dept_name` VARCHAR(100) NULL,
-  `price` FLOAT NULL,
+  `price` DECIMAL(10,2) NULL,
   `stock_quantity` INT NULL, 
-  `product_sales` float DEFAULT '0',
+  `product_sales` DECIMAL(10,2) DEFAULT '0',
   PRIMARY KEY (`item_id`)
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `departments` (
   `dept_id` int(11) NOT NULL AUTO_INCREMENT,
   `dept_name` VARCHAR(100) NULL,
-  `overhead_cost` FLOAT NULL,
+  `overhead_cost` DECIMAL(10,2) NULL,
   PRIMARY KEY (`dept_id`)
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
