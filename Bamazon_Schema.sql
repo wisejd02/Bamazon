@@ -16,6 +16,14 @@ CREATE TABLE `products` (
   `dept_name` VARCHAR(100) NULL,
   `price` FLOAT NULL,
   `stock_quantity` INT NULL, 
+  `product_sales` float DEFAULT '0',
   PRIMARY KEY (`item_id`)
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `departments` (
+  `dept_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dept_name` VARCHAR(100) NULL,
+  `overhead_cost` FLOAT NULL,
+  PRIMARY KEY (`dept_id`)
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

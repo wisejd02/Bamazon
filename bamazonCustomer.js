@@ -38,7 +38,7 @@ var connection = bamazonConnect.connect();
         console.log(err);
       }
       for (var i = 0; i < res.length; i++) {
-        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity);
+        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity, res[i].product_sales );
         objItemList.addToItemList(i, productItem);
         productItem.printItemInfo();
       }
@@ -74,10 +74,18 @@ function orderQty(obj, itemSelectedId){
     .then(function(answer) {
       var qtySelected = parseInt(answer.quantity);
       var qtyMax = parseInt(obj[idx].qty);
+      var prevSold;
+      var itmPrice = parseFloat(obj[idx].price);
       if(qtySelected && qtySelected < qtyMax+1){
-        ttlPrice = (parseFloat(obj[idx].price) * qtySelected).toFixed(2);
+        ttlPrice = (itmPrice * qtySelected).toFixed(2);
+        if(!parseFloat(obj[idx].sold)){
+          ttlSold = ttlPrice;
+        }else{
+          prevSold = parseFloat(obj[idx].sold);
+          ttlSold = (prevSold+parseFloat(ttlPrice)).toFixed(2);
+        }
         console.log(`You purchased ${qtySelected} ${obj[idx].product}.\n Your purchase total is : $${ttlPrice} ` ) 
-        processOrder(qtySelected, qtyMax, itemSelectedId);
+        processOrder(qtySelected, qtyMax, itemSelectedId, ttlSold);
       }else{
         console.log(`Please enter a quantity between 1 and ${qtyMax}`);
         orderQty(obj, itemSelectedId);
@@ -86,26 +94,20 @@ function orderQty(obj, itemSelectedId){
     });
 }
 
-function processOrder(qtySelected, qtyMax, itemSelectedId){
+function processOrder(qtySelected, qtyMax, itemSelectedId, ttlSold){
   var newQty = qtyMax - qtySelected;
   console.log(`Updating Bamazon quantities...\n`);
   var query = connection.query(
-    "UPDATE products SET ? WHERE ?",
-    [
-      {
-        stock_quantity: newQty
-      },
-      {
-        item_id: itemSelectedId
-      }
-    ],
+    "UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?",
+    [newQty, ttlSold, itemSelectedId],
     function(err, res) {
+      // logs the actual query being run
+      //console.log(query.sql);
       console.log(`${res.affectedRows} products updated!\n Thank you Come Again!\n Now exiting.`);
       process.exit();
     }
   );
 
-  // logs the actual query being run
-  //console.log(query.sql);
+  
   
 }

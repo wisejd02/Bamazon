@@ -53,7 +53,7 @@ var connection = bamazonConnect.connect();
         console.log(err);
       }
       for (var i = 0; i < res.length; i++) {
-        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity);
+        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity, res[i].product_sales);
         objItemList.addToItemList(i, productItem);
         productItem.printItemInfo();
       }
@@ -74,7 +74,7 @@ var connection = bamazonConnect.connect();
         console.log(err);
       }
       for (var i = 0; i < res.length; i++) {
-        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity);
+        var productItem = new item(res[i].item_id, res[i].product_name, res[i].dept_name, res[i].price, res[i].stock_quantity, res[i].product_sales);
         objItemList.addToItemList(i, productItem);
         productItem.printItemInfo();
       }
@@ -152,7 +152,7 @@ var connection = bamazonConnect.connect();
         })
       .then(function(answer) {
           if(answer.product){
-            var productItem = new item('', answer.product, 'dept_name', 'price', 'stock_quantity');
+            var productItem = new item('', answer.product, 'dept_name', 'price', 'stock_quantity', 'product_sales');
             productItem.depts();
             chooseDept(productItem.depts(), answer.product);
           }
