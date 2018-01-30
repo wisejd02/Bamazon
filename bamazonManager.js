@@ -152,9 +152,8 @@ var connection = bamazonConnect.connect();
         })
       .then(function(answer) {
           if(answer.product){
-            var productItem = new item('', answer.product, 'dept_name', 'price', 'stock_quantity', 'product_sales');
-            productItem.depts();
-            chooseDept(productItem.depts(), answer.product);
+            var objItemList  = new itemList;
+            chooseDept(objItemList.readDepts(), answer.product);
           }
       });
   };

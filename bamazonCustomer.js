@@ -17,13 +17,17 @@ var connection = bamazonConnect.connect();
         type: "list",
         message: "What would you like to do?",
         choices: [
-          "View Products for Sale"
+          "View Products for Sale",
+          "Exit"
         ]
       })
       .then(function(answer) {
         switch (answer.action) {
           case "View Products for Sale":
             productSearch();
+            break;
+          case "Exit":
+            exitPrgm();
             break;
         }
       });
@@ -103,11 +107,12 @@ function processOrder(qtySelected, qtyMax, itemSelectedId, ttlSold){
     function(err, res) {
       // logs the actual query being run
       //console.log(query.sql);
-      console.log(`${res.affectedRows} products updated!\n Thank you Come Again!\n Now exiting.`);
-      process.exit();
+      console.log(`${res.affectedRows} products updated!\n Thank you for your purchase.`);
+      runBamazon();
     }
-  );
+  ); 
+}
 
-  
-  
+function exitPrgm(){
+  process.exit();
 }
