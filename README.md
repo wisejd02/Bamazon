@@ -8,4 +8,6 @@ See customer below.
 ### Manager mode:
 In manager mode thu user has the ability to "View Products for Sale", "View Low Inventory", "Add to Inventory" and "Add New Product".
 See manager below.
+![bamazonmanager](https://user-images.githubusercontent.com/31144580/35600440-83fc0196-05f3-11e8-9b81-d5a6d7b2b96d.gif)
+
 
